@@ -7,31 +7,41 @@ import (
 	"github.com/perillaroc/nwpc-hpc-model-go/slurm"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
+	"text/tabwriter"
 )
-
-var users []string
-
-func init() {
-	rootCmd.AddCommand(queryCmd)
-	queryCmd.PersistentFlags().StringArrayVarP(&users, "user", "u", []string{}, "user")
-
-}
 
 var queryCmd = &cobra.Command{
 	Use:   "query",
 	Short: "Query jobs",
 	Long:  "Query jobs in queue.",
 	Run: func(cmd *cobra.Command, args []string) {
-		QueryCommand(users)
+		QueryCommand(users, partitions)
 	},
 }
 
-func QueryCommand(users []string) {
+var users []string
+var partitions []string
+
+func init() {
+	rootCmd.AddCommand(queryCmd)
+	queryCmd.PersistentFlags().StringArrayVarP(
+		&users, "user", "u", []string{}, "user")
+	queryCmd.PersistentFlags().StringArrayVarP(
+		&partitions, "partition", "p", []string{}, "partition")
+}
+
+func QueryCommand(users []string, partitions []string) {
 	params := []string{"-o %all"}
+
 	for _, user := range users {
 		params = append(params, "-u", user)
+	}
+
+	for _, partition := range partitions {
+		params = append(params, "-p", partition)
 	}
 
 	lines, err := getQueryResult(params)
@@ -46,6 +56,9 @@ func QueryCommand(users []string) {
 		log.Fatalf("model build failed: %v", err)
 	}
 
+	w := new(tabwriter.Writer)
+	w.Init(os.Stdout, 0, 4, 0, '\t', 0)
+
 	for _, item := range model.Items {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
 		account := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
@@ -54,9 +67,10 @@ func QueryCommand(users []string) {
 		state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
 		submitTime := item.GetProperty("squeue.submit_time").(*hpcmodel.DateTimeProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
-		fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
 			jobID.Text, state.Text, partition.Text, account.Text, submitTime.Text, command.Text)
 	}
+	w.Flush()
 }
 
 func getQueryResult(params []string) ([]string, error) {
@@ -69,7 +83,7 @@ func getQueryResult(params []string) ([]string, error) {
 		return nil, fmt.Errorf("command ran error: %v", err)
 	}
 	s := out.String()
-	fmt.Println(s)
+	//fmt.Println(s)
 	lines := strings.Split(s, "\n")
 	return lines, nil
 }
