@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/perillaroc/nwpc-hpc-model-go"
 	"github.com/perillaroc/nwpc-hpc-model-go/slurm"
 	"github.com/spf13/cobra"
@@ -56,6 +57,12 @@ func QueryCommand(users []string, partitions []string) {
 		log.Fatalf("model build failed: %v", err)
 	}
 
+	idColor := color.New(color.Bold).SprintFunc()
+	partitionColor := color.New(color.FgBlue).SprintfFunc()
+	accountColor := color.New(color.FgCyan).SprintfFunc()
+	submitTimeColor := color.New(color.FgBlue).SprintfFunc()
+	stateColor := color.New(color.FgYellow).SprintfFunc()
+
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
@@ -68,7 +75,12 @@ func QueryCommand(users []string, partitions []string) {
 		submitTime := item.GetProperty("squeue.submit_time").(*hpcmodel.DateTimeProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			jobID.Text, state.Text, partition.Text, account.Text, submitTime.Text, command.Text)
+			idColor(jobID.Text),
+			stateColor(state.Text),
+			partitionColor(partition.Text),
+			accountColor(account.Text),
+			submitTimeColor(submitTime.Text),
+			command.Text)
 	}
 	w.Flush()
 }

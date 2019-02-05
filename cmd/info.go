@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/perillaroc/nwpc-hpc-model-go"
 	"github.com/perillaroc/nwpc-hpc-model-go/slurm"
 	"github.com/spf13/cobra"
@@ -42,6 +43,11 @@ func InfoCommand() {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
+	partitionColor := color.New(color.Bold).SprintFunc()
+	availColor := color.New(color.FgBlue).SprintfFunc()
+	nodesColor := color.New(color.FgCyan).SprintfFunc()
+	cpusColor := color.New(color.FgMagenta).SprintfFunc()
+
 	for _, item := range model.Items {
 		partition := item.GetProperty("sinfo.partition").(*hpcmodel.StringProperty)
 		avail := item.GetProperty("sinfo.avail").(*hpcmodel.StringProperty)
@@ -49,7 +55,10 @@ func InfoCommand() {
 		cpus := item.GetProperty("sinfo.cpus").(*hpcmodel.StringProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			partition.Text, avail.Text, nodes.Text, cpus.Text)
+			partitionColor(partition.Text),
+			availColor(avail.Text),
+			nodesColor(nodes.Text),
+			cpusColor(cpus.Text))
 	}
 	w.Flush()
 }
