@@ -57,7 +57,7 @@ func QueryCommand(users []string, partitions []string) {
 	}
 
 	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 0, 4, 0, '\t', 0)
+	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
 	for _, item := range model.Items {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)

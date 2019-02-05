@@ -40,7 +40,7 @@ func InfoCommand() {
 	}
 
 	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 0, 8, 1, ' ', 0)
+	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
 	for _, item := range model.Items {
 		partition := item.GetProperty("sinfo.partition").(*hpcmodel.StringProperty)
