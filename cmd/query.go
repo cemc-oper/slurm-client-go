@@ -1,14 +1,49 @@
-package command
+package cmd
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/perillaroc/nwpc-hpc-model-go"
 	"github.com/perillaroc/nwpc-hpc-model-go/slurm"
+	"github.com/spf13/cobra"
 	"log"
 	"os/exec"
 	"strings"
 )
+
+func init() {
+	rootCmd.AddCommand(queryCmd)
+}
+
+var queryCmd = &cobra.Command{
+	Use:   "query",
+	Short: "Query jobs",
+	Long:  "Query jobs in queue.",
+	Run: func(cmd *cobra.Command, args []string) {
+		QueryCommand()
+	},
+}
+
+func QueryCommand() {
+	lines, err := getQueryResult()
+	if err != nil {
+		log.Fatalf("get query result error: %v", err)
+	}
+
+	categoryList := buildCategoryList()
+
+	model, err := slurm.BuildModel(lines, categoryList, "|")
+	if err != nil {
+		log.Fatalf("model build failed: %v", err)
+	}
+
+	for _, item := range model.Items {
+		jobIDProp := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
+		accountProp := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
+		fmt.Printf("%s\t%s\n", jobIDProp.Text, accountProp.Text)
+	}
+
+}
 
 func getQueryResult() ([]string, error) {
 	cmd := exec.Command("squeue", "-o %all")
@@ -47,25 +82,4 @@ func buildCategoryList() slurm.QueryCategoryList {
 		},
 	}
 	return categoryList
-}
-
-func QueryCommand() {
-	lines, err := getQueryResult()
-	if err != nil {
-		log.Fatalf("get query result error: %v", err)
-	}
-
-	categoryList := buildCategoryList()
-
-	model, err := slurm.BuildModel(lines, categoryList, "|")
-	if err != nil {
-		log.Fatalf("model build failed: %v", err)
-	}
-
-	for _, item := range model.Items {
-		jobIDProp := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
-		accountProp := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
-		fmt.Printf("%s\t%s\n", jobIDProp.Text, accountProp.Text)
-	}
-
 }
