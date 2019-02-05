@@ -2,7 +2,7 @@ module slurm-client-go
 
 require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190204143524-cd699128897a
+	github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190205054530-167e0584a1c2
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 )

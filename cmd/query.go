@@ -75,7 +75,7 @@ func QueryCommand(users []string, partitions []string) {
 
 func getQueryResult(params []string) ([]string, error) {
 	cmd := exec.Command("squeue", params...)
-	fmt.Println(cmd.Args)
+	//fmt.Println(cmd.Args)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
