@@ -11,8 +11,12 @@ import (
 	"strings"
 )
 
+var users []string
+
 func init() {
 	rootCmd.AddCommand(queryCmd)
+	queryCmd.PersistentFlags().StringArrayVarP(&users, "user", "u", []string{}, "user")
+
 }
 
 var queryCmd = &cobra.Command{
@@ -20,12 +24,17 @@ var queryCmd = &cobra.Command{
 	Short: "Query jobs",
 	Long:  "Query jobs in queue.",
 	Run: func(cmd *cobra.Command, args []string) {
-		QueryCommand()
+		QueryCommand(users)
 	},
 }
 
-func QueryCommand() {
-	lines, err := getQueryResult()
+func QueryCommand(users []string) {
+	params := []string{"-o %all"}
+	for _, user := range users {
+		params = append(params, "-u", user)
+	}
+
+	lines, err := getQueryResult(params)
 	if err != nil {
 		log.Fatalf("get query result error: %v", err)
 	}
@@ -38,15 +47,21 @@ func QueryCommand() {
 	}
 
 	for _, item := range model.Items {
-		jobIDProp := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
-		accountProp := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
-		fmt.Printf("%s\t%s\n", jobIDProp.Text, accountProp.Text)
+		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
+		account := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
+		partition := item.GetProperty("squeue.partition").(*hpcmodel.StringProperty)
+		command := item.GetProperty("squeue.command").(*hpcmodel.StringProperty)
+		state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
+		submitTime := item.GetProperty("squeue.submit_time").(*hpcmodel.DateTimeProperty)
+		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
+		fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\n",
+			jobID.Text, state.Text, partition.Text, account.Text, submitTime.Text, command.Text)
 	}
-
 }
 
-func getQueryResult() ([]string, error) {
-	cmd := exec.Command("squeue", "-o %all")
+func getQueryResult(params []string) ([]string, error) {
+	cmd := exec.Command("squeue", params...)
+	fmt.Println(cmd.Args)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
@@ -54,6 +69,7 @@ func getQueryResult() ([]string, error) {
 		return nil, fmt.Errorf("command ran error: %v", err)
 	}
 	s := out.String()
+	fmt.Println(s)
 	lines := strings.Split(s, "\n")
 	return lines, nil
 }
@@ -63,6 +79,14 @@ func buildCategoryList() slurm.QueryCategoryList {
 		QueryCategoryList: hpcmodel.QueryCategoryList{
 			CategoryList: []*hpcmodel.QueryCategory{
 				{
+					ID:                      "squeue.job_id",
+					DisplayName:             "JOB ID",
+					Label:                   "JOBID",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
 					ID:                      "squeue.account",
 					DisplayName:             "account",
 					Label:                   "ACCOUNT",
@@ -71,9 +95,41 @@ func buildCategoryList() slurm.QueryCategoryList {
 					RecordParserClass:       "TokenRecordParser",
 				},
 				{
-					ID:                      "squeue.job_id",
-					DisplayName:             "JOB ID",
-					Label:                   "JOBID",
+					ID:                      "squeue.partition",
+					DisplayName:             "Partition",
+					Label:                   "PARTITION",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.command",
+					DisplayName:             "Command",
+					Label:                   "COMMAND",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.state",
+					DisplayName:             "State",
+					Label:                   "STATE",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.submit_time",
+					DisplayName:             "Submit Time",
+					Label:                   "SUBMIT_TIME",
+					PropertyClass:           "DateTimeProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.work_dir",
+					DisplayName:             "Work Dir",
+					Label:                   "WORK_DIR",
 					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",
