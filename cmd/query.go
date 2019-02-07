@@ -32,14 +32,30 @@ func init() {
 }
 
 func QueryCommand(users []string, partitions []string) {
-	params := []string{"-o %all"}
+	params := []string{"-o", "%all"}
 
-	for _, user := range users {
-		params = append(params, "-u", user)
+	filter := hpcmodel.Filter{}
+
+	if len(users) > 0 {
+		checker := hpcmodel.StringInValueChecker{
+			ExpectedValues: users,
+		}
+		condition := hpcmodel.StringPropertyFilterCondition{
+			ID:      "squeue.account",
+			Checker: &checker,
+		}
+		filter.Conditions = append(filter.Conditions, &condition)
 	}
 
-	for _, partition := range partitions {
-		params = append(params, "-p", partition)
+	if len(partitions) > 0 {
+		checker := hpcmodel.StringInValueChecker{
+			ExpectedValues: partitions,
+		}
+		condition := hpcmodel.StringPropertyFilterCondition{
+			ID:      "squeue.partition",
+			Checker: &checker,
+		}
+		filter.Conditions = append(filter.Conditions, &condition)
 	}
 
 	lines, err := common.GetSqueueCommandResult(params)
@@ -61,7 +77,9 @@ func QueryCommand(users []string, partitions []string) {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
-	for _, item := range model.Items {
+	targetItems := filter.Filter(model.Items)
+
+	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
 		account := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
 		partition := item.GetProperty("squeue.partition").(*hpcmodel.StringProperty)
@@ -78,4 +96,5 @@ func QueryCommand(users []string, partitions []string) {
 			command.Text)
 	}
 	w.Flush()
+
 }

@@ -11,7 +11,7 @@ import (
 
 func GetSqueueQueryModel(lines []string) (*slurm.Model, error) {
 	categoryList := buildSqueueCategoryList()
-	model, err := slurm.BuildModel(lines, categoryList, " ")
+	model, err := slurm.BuildModel(lines, categoryList, "|")
 	return model, err
 }
 
