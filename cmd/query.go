@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"slurm-client-go/common"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -22,6 +23,7 @@ var queryCmd = &cobra.Command{
 
 var users []string
 var partitions []string
+var sortString string
 
 func init() {
 	rootCmd.AddCommand(queryCmd)
@@ -29,6 +31,8 @@ func init() {
 		&users, "user", "u", []string{}, "user")
 	queryCmd.PersistentFlags().StringArrayVarP(
 		&partitions, "partition", "p", []string{}, "partition")
+	queryCmd.PersistentFlags().StringVarP(
+		&sortString, "sort-keys", "s", "state:submit_time", "partition")
 }
 
 func QueryCommand(users []string, partitions []string) {
@@ -58,6 +62,14 @@ func QueryCommand(users []string, partitions []string) {
 		filter.Conditions = append(filter.Conditions, &condition)
 	}
 
+	var sortKeys []string
+	if len(sortString) > 0 {
+		tokens := strings.Split(sortString, ":")
+		for _, token := range tokens {
+			sortKeys = append(sortKeys, "squeue."+token)
+		}
+	}
+
 	lines, err := common.GetSqueueCommandResult(params)
 	if err != nil {
 		log.Fatalf("get query result error: %v", err)
@@ -79,10 +91,7 @@ func QueryCommand(users []string, partitions []string) {
 
 	targetItems := filter.Filter(model.Items)
 
-	common.SortItems(targetItems, []string{
-		"squeue.state",
-		"squeue.submit_time",
-	})
+	common.SortItems(targetItems, sortKeys)
 
 	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
