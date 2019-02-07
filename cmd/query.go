@@ -79,6 +79,11 @@ func QueryCommand(users []string, partitions []string) {
 
 	targetItems := filter.Filter(model.Items)
 
+	common.SortItems(targetItems, []string{
+		"squeue.state",
+		"squeue.submit_time",
+	})
+
 	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
 		account := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
