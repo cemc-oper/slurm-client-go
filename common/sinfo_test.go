@@ -1,9 +1,8 @@
-package cmd_test
+package common_test
 
 import (
-	"fmt"
 	"github.com/perillaroc/nwpc-hpc-model-go"
-	"slurm-client-go/cmd"
+	"slurm-client-go/common"
 	"strings"
 	"testing"
 )
@@ -16,8 +15,8 @@ largemem                up          226/0/0/226                  7232/0/0/7232
 normal                  up        1504/0/0/1504                48120/8/0/48128
 operation               up        1504/0/0/1504                48120/8/0/48128`
 	lines := strings.Split(line, "\n")
-	fmt.Printf("%v\n", lines)
-	model, err := cmd.GetQueryModel(lines)
+	//fmt.Printf("%v\n", lines)
+	model, err := common.GetSinfoQueryModel(lines)
 	if err != nil {
 		t.Errorf("get query model failed: %v", err)
 	}

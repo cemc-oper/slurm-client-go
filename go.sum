@@ -12,6 +12,8 @@ github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190205053146-38a3ba3a7e3c h1:DQ
 github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190205053146-38a3ba3a7e3c/go.mod h1:s+PjFGXzT3OqUvQeas0OO68H3TZ/m5rgxJfHtcuxtZo=
 github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190205054530-167e0584a1c2 h1:ASLK5t+8Yr0ybtEPSYOlan4r05tiHLNCrabdLmW3Fpo=
 github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190205054530-167e0584a1c2/go.mod h1:s+PjFGXzT3OqUvQeas0OO68H3TZ/m5rgxJfHtcuxtZo=
+github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190206114425-2deca1f6a3a9 h1:naTGjIiFtRByXMZvnJ2TwhsURHhf12k+6YaLKJ+bOAM=
+github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190206114425-2deca1f6a3a9/go.mod h1:s+PjFGXzT3OqUvQeas0OO68H3TZ/m5rgxJfHtcuxtZo=
 github.com/spf13/cobra v0.0.3 h1:ZlrZ4XsMRm04Fr5pSFxBgfND2EBVa1nLpiy1stUsX/8=
 github.com/spf13/cobra v0.0.3/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
 github.com/spf13/pflag v1.0.3 h1:zPAT6CGy6wXeQ7NtTnaTerfKOsV6V6F8agHXFiazDkg=

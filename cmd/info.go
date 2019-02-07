@@ -1,16 +1,13 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/perillaroc/nwpc-hpc-model-go"
-	"github.com/perillaroc/nwpc-hpc-model-go/slurm"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
+	"slurm-client-go/common"
 	"text/tabwriter"
 )
 
@@ -30,12 +27,12 @@ func init() {
 func InfoCommand() {
 	params := []string{"-o", "%20P %.5a %.20F %.30C"}
 
-	lines, err := getInfoResult(params)
+	lines, err := common.GetSinfoCommandResult(params)
 	if err != nil {
 		log.Fatalf("get query result error: %v", err)
 	}
 
-	model, err := GetQueryModel(lines)
+	model, err := common.GetSinfoQueryModel(lines)
 	if err != nil {
 		log.Fatalf("model build failed: %v", err)
 	}
@@ -61,66 +58,4 @@ func InfoCommand() {
 			cpusColor(cpus.Text))
 	}
 	w.Flush()
-}
-
-func GetQueryModel(lines []string) (*slurm.Model, error) {
-	categoryList := buildInfoCategoryList()
-	model, err := slurm.BuildModel(lines, categoryList, " ")
-	return model, err
-}
-
-func getInfoResult(params []string) ([]string, error) {
-	cmd := exec.Command("sinfo", params...)
-	//fmt.Println(cmd.Args)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		return nil, fmt.Errorf("command ran error: %v", err)
-	}
-	s := out.String()
-	lines := strings.Split(s, "\n")
-	return lines, nil
-}
-
-func buildInfoCategoryList() slurm.QueryCategoryList {
-	categoryList := slurm.QueryCategoryList{
-		QueryCategoryList: hpcmodel.QueryCategoryList{
-			CategoryList: []*hpcmodel.QueryCategory{
-				{
-					ID:                      "sinfo.partition",
-					DisplayName:             "Partition",
-					Label:                   "PARTITION",
-					PropertyClass:           "StringProperty",
-					PropertyCreateArguments: []string{},
-					RecordParserClass:       "TokenRecordParser",
-				},
-				{
-					ID:                      "sinfo.avail",
-					DisplayName:             "Avail",
-					Label:                   "AVAIL",
-					PropertyClass:           "StringProperty",
-					PropertyCreateArguments: []string{},
-					RecordParserClass:       "TokenRecordParser",
-				},
-				{
-					ID:                      "sinfo.nodes",
-					DisplayName:             "Nodes(A/I/O/T)",
-					Label:                   "NODES(A/I/O/T)",
-					PropertyClass:           "StringProperty",
-					PropertyCreateArguments: []string{},
-					RecordParserClass:       "TokenRecordParser",
-				},
-				{
-					ID:                      "sinfo.cpus",
-					DisplayName:             "CPUs(A/I/O/T)",
-					Label:                   "CPUS(A/I/O/T)",
-					PropertyClass:           "StringProperty",
-					PropertyCreateArguments: []string{},
-					RecordParserClass:       "TokenRecordParser",
-				},
-			},
-		},
-	}
-	return categoryList
 }
