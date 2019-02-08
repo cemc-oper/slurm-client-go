@@ -10,7 +10,7 @@ import (
 )
 
 func GetSinfoQueryModel(lines []string) (*slurm.Model, error) {
-	categoryList := buildSinfoCategoryList()
+	categoryList := BuildSinfoCategoryList()
 	model, err := slurm.BuildModel(lines, categoryList, " ")
 	return model, err
 }
@@ -29,7 +29,7 @@ func GetSinfoCommandResult(params []string) ([]string, error) {
 	return lines, nil
 }
 
-func buildSinfoCategoryList() slurm.QueryCategoryList {
+func BuildSinfoCategoryList() slurm.QueryCategoryList {
 	categoryList := slurm.QueryCategoryList{
 		QueryCategoryList: hpcmodel.QueryCategoryList{
 			CategoryList: []*hpcmodel.QueryCategory{

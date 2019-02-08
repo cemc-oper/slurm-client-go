@@ -10,7 +10,7 @@ import (
 )
 
 func GetSqueueQueryModel(lines []string) (*slurm.Model, error) {
-	categoryList := buildSqueueCategoryList()
+	categoryList := BuildSqueueCategoryList()
 	model, err := slurm.BuildModel(lines, categoryList, "|")
 	return model, err
 }
@@ -30,7 +30,7 @@ func GetSqueueCommandResult(params []string) ([]string, error) {
 	return lines, nil
 }
 
-func buildSqueueCategoryList() slurm.QueryCategoryList {
+func BuildSqueueCategoryList() slurm.QueryCategoryList {
 	categoryList := slurm.QueryCategoryList{
 		QueryCategoryList: hpcmodel.QueryCategoryList{
 			CategoryList: []*hpcmodel.QueryCategory{
