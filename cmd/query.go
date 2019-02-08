@@ -24,6 +24,7 @@ var queryCmd = &cobra.Command{
 var users []string
 var partitions []string
 var sortString string
+var commandPattern string
 
 func init() {
 	rootCmd.AddCommand(queryCmd)
@@ -32,7 +33,10 @@ func init() {
 	queryCmd.PersistentFlags().StringArrayVarP(
 		&partitions, "partition", "p", []string{}, "partition")
 	queryCmd.PersistentFlags().StringVarP(
-		&sortString, "sort-keys", "s", "state:submit_time", "partition")
+		&sortString, "sort-keys", "s",
+		"state:submit_time", "sort keys, split by :, such as status:query_date")
+	queryCmd.PersistentFlags().StringVarP(
+		&commandPattern, "command-pattern", "c", "", "command pattern")
 }
 
 func QueryCommand(users []string, partitions []string) {
@@ -57,6 +61,17 @@ func QueryCommand(users []string, partitions []string) {
 		}
 		condition := hpcmodel.StringPropertyFilterCondition{
 			ID:      "squeue.partition",
+			Checker: &checker,
+		}
+		filter.Conditions = append(filter.Conditions, &condition)
+	}
+
+	if len(commandPattern) > 0 {
+		checker := hpcmodel.StringContainChecker{
+			ExpectedValue: commandPattern,
+		}
+		condition := hpcmodel.StringPropertyFilterCondition{
+			ID:      "squeue.command",
 			Checker: &checker,
 		}
 		filter.Conditions = append(filter.Conditions, &condition)
