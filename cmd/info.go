@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"slurm-client-go/common"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -20,12 +21,25 @@ var infoCmd = &cobra.Command{
 	},
 }
 
+var infoSortString string
+
 func init() {
 	rootCmd.AddCommand(infoCmd)
+	infoCmd.PersistentFlags().StringVarP(
+		&infoSortString, "sort-keys", "s",
+		"partition", "sort keys, split by :, such as partition")
 }
 
 func InfoCommand() {
 	params := []string{"-o", "%20P %.5a %.20F %.30C"}
+
+	var sortKeys []string
+	if len(infoSortString) > 0 {
+		tokens := strings.Split(infoSortString, ":")
+		for _, token := range tokens {
+			sortKeys = append(sortKeys, "sinfo."+token)
+		}
+	}
 
 	lines, err := common.GetSinfoCommandResult(params)
 	if err != nil {
@@ -45,7 +59,11 @@ func InfoCommand() {
 	nodesColor := color.New(color.FgCyan).SprintfFunc()
 	cpusColor := color.New(color.FgMagenta).SprintfFunc()
 
-	for _, item := range model.Items {
+	targetItems := model.Items
+
+	common.SortItems(targetItems, sortKeys)
+
+	for _, item := range targetItems {
 		partition := item.GetProperty("sinfo.partition").(*hpcmodel.StringProperty)
 		avail := item.GetProperty("sinfo.avail").(*hpcmodel.StringProperty)
 		nodes := item.GetProperty("sinfo.nodes").(*hpcmodel.StringProperty)
