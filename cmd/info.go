@@ -17,7 +17,7 @@ var infoCmd = &cobra.Command{
 	Short: "query partition info",
 	Long:  "Show partition info.",
 	Run: func(cmd *cobra.Command, args []string) {
-		InfoCommand()
+		InfoCommand(infoSortString)
 	},
 }
 
@@ -30,12 +30,12 @@ func init() {
 		"partition", "sort keys, split by :, such as partition")
 }
 
-func InfoCommand() {
+func InfoCommand(sortString string) {
 	params := []string{"-o", "%20P %.5a %.20F %.30C"}
 
 	var sortKeys []string
-	if len(infoSortString) > 0 {
-		tokens := strings.Split(infoSortString, ":")
+	if len(sortString) > 0 {
+		tokens := strings.Split(sortString, ":")
 		for _, token := range tokens {
 			sortKeys = append(sortKeys, "sinfo."+token)
 		}

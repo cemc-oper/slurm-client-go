@@ -17,7 +17,7 @@ var detailCmd = &cobra.Command{
 	Short: "Query jobs in detail",
 	Long:  "Query jobs in detail.",
 	Run: func(cmd *cobra.Command, args []string) {
-		DetailCommand(users, partitions)
+		DetailCommand(detailUsers, detailPartitions, detailSortString, detailCommandPattern)
 	},
 }
 
@@ -39,7 +39,7 @@ func init() {
 		&detailCommandPattern, "command-pattern", "c", "", "command pattern")
 }
 
-func DetailCommand(users []string, partitions []string) {
+func DetailCommand(users []string, partitions []string, sortString string, commandPattern string) {
 	params := []string{"-o", "%all"}
 
 	filter := hpcmodel.Filter{}

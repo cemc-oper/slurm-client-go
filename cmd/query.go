@@ -17,29 +17,29 @@ var queryCmd = &cobra.Command{
 	Short: "Query jobs",
 	Long:  "Query jobs in queue.",
 	Run: func(cmd *cobra.Command, args []string) {
-		QueryCommand(users, partitions)
+		QueryCommand(queryUsers, queryPartitions, querySortString, queryCommandPattern)
 	},
 }
 
-var users []string
-var partitions []string
-var sortString string
-var commandPattern string
+var queryUsers []string
+var queryPartitions []string
+var querySortString string
+var queryCommandPattern string
 
 func init() {
 	rootCmd.AddCommand(queryCmd)
 	queryCmd.PersistentFlags().StringArrayVarP(
-		&users, "user", "u", []string{}, "user")
+		&queryUsers, "user", "u", []string{}, "user")
 	queryCmd.PersistentFlags().StringArrayVarP(
-		&partitions, "partition", "p", []string{}, "partition")
+		&queryPartitions, "partition", "p", []string{}, "partition")
 	queryCmd.PersistentFlags().StringVarP(
-		&sortString, "sort-keys", "s",
+		&querySortString, "sort-keys", "s",
 		"state:submit_time", "sort keys, split by :, such as status:query_date")
 	queryCmd.PersistentFlags().StringVarP(
-		&commandPattern, "command-pattern", "c", "", "command pattern")
+		&queryCommandPattern, "command-pattern", "c", "", "command pattern")
 }
 
-func QueryCommand(users []string, partitions []string) {
+func QueryCommand(users []string, partitions []string, sortString string, commandPattern string) {
 	params := []string{"-o", "%all"}
 
 	filter := hpcmodel.Filter{}

@@ -22,7 +22,7 @@ func (f *LongTimeJobFilter) Apply(items []hpcmodel.Item) []hpcmodel.Item {
 		},
 	}
 
-	ownerConditon := hpcmodel.StringPropertyFilterCondition{
+	ownerCondition := hpcmodel.StringPropertyFilterCondition{
 		ID: "squeue.owner",
 		Checker: &hpcmodel.StringInValueChecker{
 			ExpectedValues: f.users,
@@ -31,7 +31,7 @@ func (f *LongTimeJobFilter) Apply(items []hpcmodel.Item) []hpcmodel.Item {
 
 	filter := hpcmodel.Filter{
 		Conditions: []hpcmodel.FilterCondition{
-			&ownerConditon,
+			&ownerCondition,
 			&dateCondition,
 		},
 	}
