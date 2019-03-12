@@ -1,7 +1,7 @@
 package long_time_job
 
 import (
-	"github.com/perillaroc/nwpc-hpc-model-go"
+	"github.com/perillaroc/hpc-model-go"
 	"time"
 )
 

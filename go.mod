@@ -5,7 +5,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
-	github.com/perillaroc/nwpc-hpc-model-go v0.0.0-20190208032104-a804d43553a9
+	github.com/perillaroc/hpc-model-go v0.0.0-20190312143807-04a69051ffe9
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
 )

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/perillaroc/nwpc-hpc-model-go"
+	"github.com/perillaroc/hpc-model-go"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
