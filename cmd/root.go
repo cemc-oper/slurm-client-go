@@ -11,6 +11,7 @@ var rootCmd = &cobra.Command{
 	Short: "A CLI client for slurm",
 	Long:  `A command line tool for Slurm to query jobs.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
 	},
 }
 
