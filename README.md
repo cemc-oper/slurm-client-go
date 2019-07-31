@@ -1,6 +1,6 @@
 # slurm-client-go
 
-A command line tool for Slurm using in NWPC.
+A command line tool for Slurm using in HPC-PI by NWPC.
 
 ## Features
 
@@ -15,8 +15,10 @@ Download the latest codes from Github.
 Build the binary using:
 
 ```bash
-go build -o slclient_go main.go
+go build -o bin/slclient_go main.go
 ```
+
+Or use `Makefile` in Linux.
 
 ## Getting started
 
@@ -38,7 +40,6 @@ All jobs in queue will be shown:
 Use `slclient_go --help` to see more sub-commands.
 
 ## License
-
 
 Copyright &copy; 2019, Perilla Roc.
 
