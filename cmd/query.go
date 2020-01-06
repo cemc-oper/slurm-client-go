@@ -114,7 +114,7 @@ func QueryCommand(users []string, partitions []string, sortString string, comman
 		partition := item.GetProperty("squeue.partition").(*hpcmodel.StringProperty)
 		command := item.GetProperty("squeue.command").(*hpcmodel.StringProperty)
 		state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
-		nodes := item.GetProperty("squeue.nodes").(*hpcmodel.StringProperty)
+		nodes := item.GetProperty("squeue.nodes").(*hpcmodel.NumberProperty)
 		submitTime := item.GetProperty("squeue.submit_time").(*hpcmodel.DateTimeProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",

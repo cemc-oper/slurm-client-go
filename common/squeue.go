@@ -102,7 +102,7 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					ID:                      "squeue.nodes",
 					DisplayName:             "NODEs",
 					Label:                   "NODES",
-					PropertyClass:           "StringProperty",
+					PropertyClass:           "NumberProperty",
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",
 				},
