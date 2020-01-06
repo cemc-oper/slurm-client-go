@@ -114,12 +114,14 @@ func QueryCommand(users []string, partitions []string, sortString string, comman
 		partition := item.GetProperty("squeue.partition").(*hpcmodel.StringProperty)
 		command := item.GetProperty("squeue.command").(*hpcmodel.StringProperty)
 		state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
+		nodes := item.GetProperty("squeue.nodes").(*hpcmodel.StringProperty)
 		submitTime := item.GetProperty("squeue.submit_time").(*hpcmodel.DateTimeProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			idColor(jobID.Text),
 			stateColor(state.Text),
 			partitionColor(partition.Text),
+			partitionColor(nodes.Text),
 			accountColor(account.Text),
 			submitTimeColor(submitTime.Text),
 			command.Text)

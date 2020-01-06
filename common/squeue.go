@@ -90,6 +90,22 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",
 				},
+				{
+					ID:                      "squeue.cpus",
+					DisplayName:             "CPUs",
+					Label:                   "CPUS",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.nodes",
+					DisplayName:             "NODEs",
+					Label:                   "NODES",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
 			},
 		},
 	}
