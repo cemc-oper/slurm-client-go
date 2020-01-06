@@ -3,8 +3,8 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/perillaroc/hpc-model-go"
-	"github.com/perillaroc/hpc-model-go/slurm"
+	"github.com/nwpc-oper/hpc-model-go"
+	"github.com/nwpc-oper/hpc-model-go/slurm"
 	"os/exec"
 	"strings"
 )

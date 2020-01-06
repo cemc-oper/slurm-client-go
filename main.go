@@ -1,6 +1,6 @@
 package main
 
-import "slurm-client-go/cmd"
+import "github.com/nwpc-oper/slurm-client-go/cmd"
 
 func main() {
 	cmd.Execute()

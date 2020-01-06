@@ -1,8 +1,8 @@
 package common_test
 
 import (
-	"github.com/perillaroc/hpc-model-go"
-	"slurm-client-go/common"
+	"github.com/nwpc-oper/hpc-model-go"
+	"github.com/nwpc-oper/slurm-client-go/common"
 	"strings"
 	"testing"
 )

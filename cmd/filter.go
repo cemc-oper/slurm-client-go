@@ -3,12 +3,12 @@ package cmd
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/perillaroc/hpc-model-go"
+	"github.com/nwpc-oper/hpc-model-go"
+	"github.com/nwpc-oper/slurm-client-go/common"
+	"github.com/nwpc-oper/slurm-client-go/filters/long_time_job"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"slurm-client-go/common"
-	"slurm-client-go/filters/long_time_job"
 	"text/tabwriter"
 )
 

@@ -1,7 +1,7 @@
 package common
 
 import (
-	. "github.com/perillaroc/hpc-model-go"
+	. "github.com/nwpc-oper/hpc-model-go"
 )
 
 func SortItems(items []Item, keys []string) {

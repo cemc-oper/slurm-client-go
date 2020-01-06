@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/nwpc-oper/slurm-client-go/common"
 	"github.com/spf13/cobra"
-	"slurm-client-go/common"
 )
 
 var categoryCmd = &cobra.Command{
