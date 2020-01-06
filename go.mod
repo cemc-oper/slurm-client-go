@@ -17,3 +17,5 @@ replace golang.org/x/net v0.0.0-20180821023952-922f4815f713 => github.com/golang
 replace golang.org/x/sys v0.0.0-20181205085412-a5c9d58dba9a => github.com/golang/sys v0.0.0-20181205085412-a5c9d58dba9a
 
 replace golang.org/x/text v0.3.0 => github.com/golang/text v0.3.0
+
+go 1.13
