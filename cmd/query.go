@@ -110,7 +110,7 @@ func QueryCommand(users []string, partitions []string, sortString string, comman
 
 	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
-		account := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
+		user := item.GetProperty("squeue.user").(*hpcmodel.StringProperty)
 		partition := item.GetProperty("squeue.partition").(*hpcmodel.StringProperty)
 		command := item.GetProperty("squeue.command").(*hpcmodel.StringProperty)
 		state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
@@ -122,7 +122,7 @@ func QueryCommand(users []string, partitions []string, sortString string, comman
 			stateColor(state.Text),
 			partitionColor(partition.Text),
 			partitionColor(nodes.Text),
-			accountColor(account.Text),
+			accountColor(user.Text),
 			submitTimeColor(submitTime.Text),
 			command.Text)
 	}

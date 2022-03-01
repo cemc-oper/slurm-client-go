@@ -51,6 +51,14 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					RecordParserClass:       "TokenRecordParser",
 				},
 				{
+					ID:                      "squeue.user",
+					DisplayName:             "user",
+					Label:                   "USER",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
 					ID:                      "squeue.partition",
 					DisplayName:             "Partition",
 					Label:                   "PARTITION",

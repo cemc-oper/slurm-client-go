@@ -1,6 +1,6 @@
 # slurm-client-go
 
-A command line tool for Slurm using in HPC-PI by NWPC.
+A command line tool for Slurm using in CMA-PI HPC by CEMC.
 
 ## Features
 
@@ -41,6 +41,6 @@ Use `slclient_go --help` to see more sub-commands.
 
 ## License
 
-Copyright &copy; 2019-2020, Perilla Roc.
+Copyright &copy; 2019-2022, Perilla Roc at CEMC.
 
 `slurm-client-go` is licensed under [GPL-3.0](http://www.gnu.org/licenses/gpl-3.0.en.html).

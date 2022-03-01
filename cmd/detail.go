@@ -110,7 +110,7 @@ func DetailCommand(users []string, partitions []string, sortString string, comma
 
 	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
-		account := item.GetProperty("squeue.account").(*hpcmodel.StringProperty)
+		user := item.GetProperty("squeue.user").(*hpcmodel.StringProperty)
 		partition := item.GetProperty("squeue.partition").(*hpcmodel.StringProperty)
 		command := item.GetProperty("squeue.command").(*hpcmodel.StringProperty)
 		state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
@@ -120,7 +120,7 @@ func DetailCommand(users []string, partitions []string, sortString string, comma
 			idColor(jobID.Text),
 			stateColor(state.Text),
 			partitionColor(partition.Text),
-			accountColor(account.Text),
+			accountColor(user.Text),
 			submitTimeColor(submitTime.Text))
 		fmt.Fprintf(w, "Command: %s\n", command.Text)
 		fmt.Fprintf(w, "\n")
