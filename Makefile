@@ -3,5 +3,5 @@ all: slurm_client
 
 slurm_client:
 	go build \
-		-o bin/slclient_go \
+		-o bin/slclient \
 		main.go

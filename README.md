@@ -15,7 +15,7 @@ Download the latest codes from Github.
 Build the binary using:
 
 ```bash
-go build -o bin/slclient_go main.go
+go build -o bin/slclient main.go
 ```
 
 Or use `Makefile` in Linux.
@@ -25,7 +25,7 @@ Or use `Makefile` in Linux.
 Query Slurm jobs:
 
 ```bash
-slclient_go query
+slclient query
 ```
 
 All jobs in queue will be shown:
@@ -37,10 +37,10 @@ All jobs in queue will be shown:
 5864521 RUNNING normal lijl    2019-01-31 01:10:34 /g6/lijl/BCC_CSMv3.v20190124/p25_5/build.csh
 ```
 
-Use `slclient_go --help` to see more sub-commands.
+Use `slclient --help` to see more sub-commands.
 
 ## License
 
-Copyright &copy; 2019-2022, Perilla Roc at CEMC.
+Copyright &copy; 2019-2022, Perilla Roc at cemc-oper.
 
 `slurm-client-go` is licensed under [GPL-3.0](http://www.gnu.org/licenses/gpl-3.0.en.html).
