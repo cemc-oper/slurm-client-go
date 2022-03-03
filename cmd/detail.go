@@ -49,7 +49,7 @@ func DetailCommand(users []string, partitions []string, sortString string, comma
 			ExpectedValues: users,
 		}
 		condition := hpcmodel.StringPropertyFilterCondition{
-			ID:      "squeue.account",
+			ID:      "squeue.user",
 			Checker: &checker,
 		}
 		filter.Conditions = append(filter.Conditions, &condition)
