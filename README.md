@@ -43,4 +43,4 @@ Use `slclient --help` to see more sub-commands.
 
 Copyright &copy; 2019-2022, Perilla Roc at cemc-oper.
 
-`slurm-client-go` is licensed under [GPL-3.0](http://www.gnu.org/licenses/gpl-3.0.en.html).
+`slurm-client-go` is licensed under [MIT License](./LICENSE).
