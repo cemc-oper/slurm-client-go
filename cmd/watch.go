@@ -16,12 +16,13 @@ var watchCmd = &cobra.Command{
 	Short: "Watch jobs",
 	Long:  "Watch jobs until finished.",
 	Run: func(cmd *cobra.Command, args []string) {
-		WatchCommand(watchUsers, watchPartitions)
+		WatchCommand(watchUsers, watchPartitions, watchJobs)
 	},
 }
 
 var watchUsers []string
 var watchPartitions []string
+var watchJobs []string
 
 func init() {
 	rootCmd.AddCommand(watchCmd)
@@ -30,9 +31,11 @@ func init() {
 		&watchUsers, "user", "u", []string{}, "user")
 	watchCmd.PersistentFlags().StringArrayVarP(
 		&watchPartitions, "partition", "p", []string{}, "partition")
+	watchCmd.PersistentFlags().StringArrayVarP(
+		&watchJobs, "job", "j", []string{}, "jobs")
 }
 
-func getRunningJobs(users []string, partitions []string) []hpcmodel.Item {
+func getRunningJobs(users []string, partitions []string, jobs []string) []hpcmodel.Item {
 	params := []string{"-o", "%all"}
 
 	filter := hpcmodel.Filter{}
@@ -59,6 +62,17 @@ func getRunningJobs(users []string, partitions []string) []hpcmodel.Item {
 		filter.Conditions = append(filter.Conditions, &condition)
 	}
 
+	if len(jobs) > 0 {
+		checker := hpcmodel.StringInValueChecker{
+			ExpectedValues: jobs,
+		}
+		condition := hpcmodel.StringPropertyFilterCondition{
+			ID:      "squeue.job_id",
+			Checker: &checker,
+		}
+		filter.Conditions = append(filter.Conditions, &condition)
+	}
+
 	lines, err := common.GetSqueueCommandResult(params)
 	if err != nil {
 		log.Fatalf("get query result error: %v", err)
@@ -78,9 +92,9 @@ func getCurrentTime() string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
-func WatchCommand(users []string, partitions []string) {
+func WatchCommand(users []string, partitions []string, jobs []string) {
 	for true {
-		items := getRunningJobs(users, partitions)
+		items := getRunningJobs(users, partitions, jobs)
 		jobLens := len(items)
 		if jobLens == 0 {
 			fmt.Printf("[%s]checking jobs...done\n", getCurrentTime())
