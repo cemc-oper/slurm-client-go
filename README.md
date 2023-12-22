@@ -1,6 +1,6 @@
 # slurm-client-go
 
-A command line tool for Slurm using in CMA-PI HPC by CEMC.
+A command line tool for Slurm using in CMA-PI HPC by CEMC/CMA.
 
 ## Features
 
@@ -39,8 +39,26 @@ All jobs in queue will be shown:
 
 Use `slclient --help` to see more sub-commands.
 
+## Commands
+
+### query
+
+
+
+### info
+
+
+
+### detail
+
+
+
+### watch
+
+
+
 ## License
 
-Copyright &copy; 2019-2022, Perilla Roc at cemc-oper.
+Copyright &copy; 2019-2023, developers at cemc-oper.
 
 `slurm-client-go` is licensed under [MIT License](./LICENSE).
