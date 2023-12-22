@@ -1,6 +1,6 @@
 package common
 
-import "github.com/nwpc-oper/hpc-model-go"
+import "github.com/cemc-oper/hpc-model-go"
 
 type ItemFilter interface {
 	Apply(items []hpcmodel.Item) []hpcmodel.Item

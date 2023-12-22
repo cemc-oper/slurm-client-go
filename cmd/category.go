@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/cemc-oper/slurm-client-go/common"
 	"github.com/fatih/color"
-	"github.com/nwpc-oper/slurm-client-go/common"
 	"github.com/spf13/cobra"
 )
 

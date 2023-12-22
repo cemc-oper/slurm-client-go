@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/cemc-oper/hpc-model-go"
+	"github.com/cemc-oper/slurm-client-go/common"
+	"github.com/cemc-oper/slurm-client-go/filters/long_time_job"
 	"github.com/fatih/color"
-	"github.com/nwpc-oper/hpc-model-go"
-	"github.com/nwpc-oper/slurm-client-go/common"
-	"github.com/nwpc-oper/slurm-client-go/filters/long_time_job"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
