@@ -1,6 +1,6 @@
 # slurm-client-go
 
-A command line tool for Slurm using in CMA-PI HPC by CEMC/CMA.
+A command line tool for Slurm in CMA-HPC by CEMC/CMA.
 
 ## Features
 
@@ -10,7 +10,7 @@ A command line tool for Slurm using in CMA-PI HPC by CEMC/CMA.
 
 ## Installing
 
-Download the latest codes from Github.
+Download the latest codes from GitHub.
 
 Build the binary using:
 

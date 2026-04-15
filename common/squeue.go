@@ -22,7 +22,7 @@ func GetSqueueCommandResult(params []string) ([]string, error) {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		return nil, fmt.Errorf("command ran error: %v", err)
+		return nil, fmt.Errorf("command run error: %v", err)
 	}
 	s := out.String()
 	//fmt.Println(s)

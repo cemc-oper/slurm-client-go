@@ -41,7 +41,7 @@ func (f *LongTimeJobFilter) Apply(items []hpcmodel.Item) []hpcmodel.Item {
 
 func CreateFilter() *LongTimeJobFilter {
 	return &LongTimeJobFilter{
-		users:    []string{"nwp", "nwp_qu", "nwp_sp"},
-		duration: time.Duration(time.Hour * 5),
+		users:    []string{"op_gfs", "op_meso", "op_eps", "op_spec", "op_post", "op_srv"},
+		duration: time.Hour * 5,
 	}
 }
