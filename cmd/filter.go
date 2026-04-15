@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"text/tabwriter"
+
 	"github.com/cemc-oper/hpc-model-go"
 	"github.com/cemc-oper/slurm-client-go/common"
 	"github.com/cemc-oper/slurm-client-go/filters/long_time_job"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"log"
-	"os"
-	"text/tabwriter"
 )
 
 var filterCmd = &cobra.Command{
@@ -51,7 +52,7 @@ func FilterCommand() {
 
 	common.SortItems(targetItems, []string{"squeue.state", "squeue.submit_time"})
 
-	fmt.Fprintf(w, "%s\n", boldColor("long_time_job_filter:"))
+	fmt.Fprintf(w, "%s\n", boldColor("long_time_job_filter (experiment):"))
 
 	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
