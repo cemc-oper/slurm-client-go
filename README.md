@@ -31,8 +31,8 @@ slclient query
 All jobs in queue will be shown:
 
 ```text
-175294122 RUNNING operation   384 op_meso  2026-04-15 07:36:30 /g2/op_meso/OPER/ECFOUT/cma_meso_1km_v6_0_am/warm/06/model/fcst.job1
-175294861 RUNNING serial_op   1   op_post  2026-04-15 07:50:02 /g2/op_post/ECFLOWOUT/cma_meso_1km_post_am/06/graph/meso_diag/area.shr_1km/plot_hour_003.job1
+123456789 RUNNING operation   384 account1  2026-01-01 12:00:00 /path/to/account1/job1
+987654321 RUNNING serial_op   1   account2  2026-01-01 12:30:00 /path/to/account2/job2
 ```
 
 Use `slclient --help` to see more sub-commands.
@@ -45,7 +45,7 @@ Query active jobs in the Slurm queue.
 
 ```bash
 slclient query
-slclient query -u lijl -u chendh
+slclient query -u user1 -u user2
 slclient query -p normal -s state:submit_time
 slclient query -c "build.csh"
 ```
@@ -76,7 +76,7 @@ Query jobs with detailed output (includes the full command line for each job).
 
 ```bash
 slclient detail
-slclient detail -u lijl -p normal
+slclient detail -u user1 -p normal
 ```
 
 Flags:
@@ -92,8 +92,8 @@ Watch jobs until they finish. Checks every minute and prints a summary of job st
 
 ```bash
 slclient watch
-slclient watch -j 5831234 -j 5831591
-slclient watch -u lijl -p normal
+slclient watch -j 1234567 -j 7654321
+slclient watch -u user1 -p normal
 ```
 
 Flags:
