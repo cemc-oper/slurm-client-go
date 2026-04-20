@@ -28,11 +28,12 @@ Query Slurm jobs:
 slclient query
 ```
 
-All jobs in queue will be shown:
+All jobs in queue will be shown (columns are colored and right-aligned except the last):
 
 ```text
-123456789 RUNNING operation   384 account1  2026-01-01 12:00:00 /path/to/account1/job1
-987654321 RUNNING serial_op   1   account2  2026-01-01 12:30:00 /path/to/account2/job2
+ JOB ID   State PARTITION NODEs   User         Submit Time       Time Command
+1234567 RUNNING    normal    24  user1 2026-01-01 01:10:01 1-23:45:00 /some/path/to/user1/job
+7654321 RUNNING    serial     1  user2 2026-01-01 01:20:10   01:23:34 /some/path/to/user2/job
 ```
 
 Use `slclient --help` to see more sub-commands.
@@ -47,7 +48,7 @@ Query active jobs in the Slurm queue.
 slclient query
 slclient query -u user1 -u user2
 slclient query -p normal -s state:submit_time
-slclient query -c "build.csh"
+slclient query -c "user1.csh"
 ```
 
 Flags:

@@ -3,10 +3,11 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/cemc-oper/hpc-model-go"
-	"github.com/cemc-oper/hpc-model-go/slurm"
 	"os/exec"
 	"strings"
+
+	"github.com/cemc-oper/hpc-model-go"
+	"github.com/cemc-oper/hpc-model-go/slurm"
 )
 
 func GetSqueueQueryModel(lines []string) (*slurm.Model, error) {
@@ -43,8 +44,16 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					RecordParserClass:       "TokenRecordParser",
 				},
 				{
+					ID:                      "squeue.name",
+					DisplayName:             "Name",
+					Label:                   "NAME",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
 					ID:                      "squeue.account",
-					DisplayName:             "account",
+					DisplayName:             "Account",
 					Label:                   "ACCOUNT",
 					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
@@ -52,7 +61,7 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 				},
 				{
 					ID:                      "squeue.user",
-					DisplayName:             "user",
+					DisplayName:             "User",
 					Label:                   "USER",
 					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
@@ -67,9 +76,9 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					RecordParserClass:       "TokenRecordParser",
 				},
 				{
-					ID:                      "squeue.command",
-					DisplayName:             "Command",
-					Label:                   "COMMAND",
+					ID:                      "squeue.qos",
+					DisplayName:             "QoS",
+					Label:                   "QOS",
 					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",
@@ -83,10 +92,66 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					RecordParserClass:       "TokenRecordParser",
 				},
 				{
+					ID:                      "squeue.reason",
+					DisplayName:             "Reason",
+					Label:                   "REASON",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.command",
+					DisplayName:             "Command",
+					Label:                   "COMMAND",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
 					ID:                      "squeue.submit_time",
 					DisplayName:             "Submit Time",
 					Label:                   "SUBMIT_TIME",
 					PropertyClass:           "DateTimeProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.start_time",
+					DisplayName:             "Start Time",
+					Label:                   "START_TIME",
+					PropertyClass:           "DateTimeProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.end_time",
+					DisplayName:             "End Time",
+					Label:                   "END_TIME",
+					PropertyClass:           "DateTimeProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.run_time",
+					DisplayName:             "Time",
+					Label:                   "TIME",
+					PropertyClass:           "TimeStringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.time_limit",
+					DisplayName:             "Time Limit",
+					Label:                   "TIME_LIMIT",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.time_left",
+					DisplayName:             "Time Left",
+					Label:                   "TIME_LEFT",
+					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",
 				},
@@ -111,6 +176,46 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					DisplayName:             "NODEs",
 					Label:                   "NODES",
 					PropertyClass:           "NumberProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.min_memory",
+					DisplayName:             "Memory",
+					Label:                   "MIN_MEMORY",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.nodelist",
+					DisplayName:             "Node List",
+					Label:                   "NODELIST",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.exec_host",
+					DisplayName:             "Exec Host",
+					Label:                   "EXEC_HOST",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.features",
+					DisplayName:             "Features",
+					Label:                   "FEATURES",
+					PropertyClass:           "StringProperty",
+					PropertyCreateArguments: []string{},
+					RecordParserClass:       "TokenRecordParser",
+				},
+				{
+					ID:                      "squeue.priority",
+					DisplayName:             "Priority",
+					Label:                   "PRIORITY",
+					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",
 				},
