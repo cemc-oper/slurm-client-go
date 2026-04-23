@@ -1,0 +1,42 @@
+version: 2
+
+project_name: slclient
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/cemc-oper/slurm-client-go/cmd.version={{.Tag}}
+      - -X github.com/cemc-oper/slurm-client-go/cmd.commit={{.Commit}}
+      - -X github.com/cemc-oper/slurm-client-go/cmd.buildDate={{.Date}}
+    main: .
+    binary: slclient
+
+archives:
+  - formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Os }}_
+      {{- .Arch }}
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
