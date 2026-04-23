@@ -101,11 +101,13 @@ func QueryCommand(users []string, partitions []string, sortString string, comman
 	renderQueryTable(targetItems)
 }
 
+// colDef defines the metadata for a table column: property ID and render style.
 type colDef struct {
 	prop  string
 	style lipgloss.Style
 }
 
+// buildColumns builds the column definitions for TUI/query output with adaptive light/dark theme colors.
 func buildColumns() []colDef {
 	isDark := lipgloss.HasDarkBackground(os.Stdin, os.Stdout)
 	adaptiveColor := lipgloss.LightDark(isDark)
@@ -137,6 +139,7 @@ func buildColumns() []colDef {
 	}
 }
 
+// getProp extracts the text value and display name for a property from an Item, with type-specific assertions.
 func getProp(item hpcmodel.Item, propID string) (text, displayName string) {
 	switch propID {
 	case "squeue.job_id", "squeue.state", "squeue.partition", "squeue.user", "squeue.command":
