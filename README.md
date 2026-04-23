@@ -5,20 +5,41 @@ A command line tool for Slurm in CMA-HPC2023 by CEMC/CMA.
 ## Features
 
 - Query active jobs
-- Show partition information.
-- (experiment) Filter long time jobs for operation users.
+- Show partition information
+- Interactive TUI for browsing jobs
+- (experiment) Filter long time jobs for operation users
 
 ## Installing
 
-Download the latest codes from GitHub.
+### Pre-built binaries
 
-Build the binary using:
+Download the latest release from the [Releases](https://github.com/perillaroc/slurm-client-go/releases) page.
+
+### Build from source
+
+Clone the repository and build using Go:
 
 ```bash
 go build -o bin/slclient main.go
 ```
 
-Or use `Makefile` in Linux.
+Or use the Makefile:
+
+```bash
+# Local build (current platform)
+make build
+
+# Cross-compile for a specific platform
+make linux/amd64
+make linux/arm64
+make windows/amd64
+make windows/arm64
+
+# Build all platforms
+make build-all
+```
+
+The compiled binary will be placed in the `bin/` directory.
 
 ## Getting started
 
@@ -103,6 +124,16 @@ Flags:
 - `-p, --partition` — Filter by partition (can be specified multiple times).
 - `-j, --job` — Filter by job ID (can be specified multiple times).
 
+### `tui`
+
+Launch an interactive terminal UI to browse jobs with real-time updates.
+
+```bash
+slclient tui
+```
+
+Use arrow keys to navigate, `q` or `ctrl+c` to quit.
+
 ### `filter` (experiment)
 
 Filter long-running jobs for operation users.
@@ -123,6 +154,24 @@ slclient category -d
 Flags:
 
 - `-d, --detail` — Show detailed information for each category.
+
+### `version`
+
+Print version and build information.
+
+```bash
+slclient version
+```
+
+Example output:
+
+```text
+Version:    v1.0.0
+Git Hash:   a1b2c3d
+Build Date: 2026-04-23T12:00:00Z
+Go Version: go1.26.2
+OS/Arch:    linux/amd64
+```
 
 ## License
 
