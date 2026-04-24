@@ -6,10 +6,10 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"charm.land/lipgloss/v2"
 	"github.com/cemc-oper/hpc-model-go"
 	"github.com/cemc-oper/slurm-client-go/common"
 	"github.com/cemc-oper/slurm-client-go/filters/long_time_job"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -41,18 +41,18 @@ func FilterCommand() {
 	filter := long_time_job.CreateFilter()
 	targetItems := filter.Apply(model.Items)
 
-	boldColor := color.New(color.Bold).SprintFunc()
-	partitionColor := color.New(color.FgBlue).SprintfFunc()
-	accountColor := color.New(color.FgCyan).SprintfFunc()
-	submitTimeColor := color.New(color.FgBlue).SprintfFunc()
-	stateColor := color.New(color.FgYellow).SprintfFunc()
+	idStyle := lipgloss.NewStyle().Bold(true)
+	partitionStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#1976D2"))
+	accountStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#00838F"))
+	submitTimeStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#1976D2"))
+	stateStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#F9A825"))
 
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
 	common.SortItems(targetItems, []string{"squeue.state", "squeue.submit_time"})
 
-	fmt.Fprintf(w, "%s\n", boldColor("long_time_job_filter (experiment):"))
+	fmt.Fprintf(w, "%s\n", idStyle.Render("long_time_job_filter (experiment):"))
 
 	for _, item := range targetItems {
 		jobID := item.GetProperty("squeue.job_id").(*hpcmodel.StringProperty)
@@ -63,11 +63,11 @@ func FilterCommand() {
 		submitTime := item.GetProperty("squeue.submit_time").(*hpcmodel.DateTimeProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			boldColor(jobID.Text),
-			stateColor(state.Text),
-			partitionColor(partition.Text),
-			accountColor(account.Text),
-			submitTimeColor(submitTime.Text),
+			idStyle.Render(jobID.Text),
+			stateStyle.Render(state.Text),
+			partitionStyle.Render(partition.Text),
+			accountStyle.Render(account.Text),
+			submitTimeStyle.Render(submitTime.Text),
 			command.Text)
 	}
 	fmt.Fprintf(w, "\n")

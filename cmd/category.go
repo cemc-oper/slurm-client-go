@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
+
+	"charm.land/lipgloss/v2"
 	"github.com/cemc-oper/slurm-client-go/common"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -27,23 +28,23 @@ func init() {
 func CategoryCommand() {
 	categoryList := common.BuildSqueueCategoryList()
 
-	boldColor := color.New(color.Bold).SprintFunc()
-	blueColor := color.New(color.FgBlue).SprintfFunc()
+	idStyle := lipgloss.NewStyle().Bold(true)
+	labelStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#64B5F6"))
 
 	for _, category := range categoryList.CategoryList {
-		fmt.Printf("%s\n", boldColor(category.ID))
+		fmt.Printf("%s\n", idStyle.Render(category.ID))
 		if !categoryDetail {
 			continue
 		}
-		fmt.Printf("  %s: %s\n", blueColor("display name"), category.DisplayName)
-		fmt.Printf("  %s: %s\n", blueColor("label"), category.Label)
-		fmt.Printf("  %s: %s\n", blueColor("record parser"), category.RecordParserClass)
-		fmt.Printf("  %s:\n", blueColor("record parser arguments"))
+		fmt.Printf("  %s: %s\n", labelStyle.Render("display name"), category.DisplayName)
+		fmt.Printf("  %s: %s\n", labelStyle.Render("label"), category.Label)
+		fmt.Printf("  %s: %s\n", labelStyle.Render("record parser"), category.RecordParserClass)
+		fmt.Printf("  %s:\n", labelStyle.Render("record parser arguments"))
 		for _, arg := range category.RecordParserArguments {
 			fmt.Printf("    %s\n", arg)
 		}
-		fmt.Printf("  %s: %s\n", blueColor("property class"), category.PropertyClass)
-		fmt.Printf("  %s:\n", blueColor("property create arguments"))
+		fmt.Printf("  %s: %s\n", labelStyle.Render("property class"), category.PropertyClass)
+		fmt.Printf("  %s:\n", labelStyle.Render("property create arguments"))
 		for _, arg := range category.PropertyCreateArguments {
 			fmt.Printf("    %s\n", arg)
 		}

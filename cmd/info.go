@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"github.com/cemc-oper/hpc-model-go"
 	"github.com/cemc-oper/slurm-client-go/common"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	"charm.land/lipgloss/v2"
 )
 
 var infoCmd = &cobra.Command{
@@ -54,10 +55,10 @@ func InfoCommand(sortString string) {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 0, 1, ' ', 0)
 
-	partitionColor := color.New(color.Bold).SprintFunc()
-	availColor := color.New(color.FgBlue).SprintfFunc()
-	nodesColor := color.New(color.FgCyan).SprintfFunc()
-	cpusColor := color.New(color.FgMagenta).SprintfFunc()
+	partitionStyle := lipgloss.NewStyle().Bold(true)
+	availStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#1976D2"))
+	nodesStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#00838F"))
+	cpusStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#7B1FA2"))
 
 	targetItems := model.Items
 
@@ -70,10 +71,10 @@ func InfoCommand(sortString string) {
 		cpus := item.GetProperty("sinfo.cpus").(*hpcmodel.StringProperty)
 		// workDir := item.GetProperty("squeue.work_dir").(*hpcmodel.StringProperty)
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			partitionColor(partition.Text),
-			availColor(avail.Text),
-			nodesColor(nodes.Text),
-			cpusColor(cpus.Text))
+			partitionStyle.Render(partition.Text),
+			availStyle.Render(avail.Text),
+			nodesStyle.Render(nodes.Text),
+			cpusStyle.Render(cpus.Text))
 	}
 	w.Flush()
 }
