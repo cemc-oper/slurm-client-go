@@ -50,6 +50,7 @@ type jobDelegate struct {
 	columns   []ColDef
 	colWidths []int
 	isDark    bool
+	indent    int // leading spaces for tree view job rows
 }
 
 func (d jobDelegate) Height() int                         { return 1 }
@@ -99,8 +100,8 @@ func (d jobDelegate) Render(w io.Writer, m list.Model, index int, listItem list.
 	for i := 0; i < lastIdx; i++ {
 		usedWidth += lipgloss.Width(cells[i])
 	}
-	usedWidth += lastIdx               // spaces between columns
-	avail := m.Width() - usedWidth - 2 // margin for cursor/selection markers
+	usedWidth += lastIdx                          // spaces between columns
+	avail := m.Width() - usedWidth - 2 - d.indent // margin for cursor/selection markers and indent
 	if avail < 3 {
 		avail = 3
 	}
@@ -109,6 +110,9 @@ func (d jobDelegate) Render(w io.Writer, m list.Model, index int, listItem list.
 	}
 
 	line := strings.Join(cells, " ")
+	if d.indent > 0 {
+		fmt.Fprint(w, strings.Repeat(" ", d.indent))
+	}
 	fmt.Fprint(w, line)
 }
 
@@ -127,18 +131,13 @@ func computeColWidths(columns []ColDef, items []hpcmodel.Item) []int {
 	return widths
 }
 
-// buildSummary counts total jobs, state distribution, and unique users for the status bar.
-func buildSummary(items []list.Item) string {
+// buildSummaryFromJobs counts total jobs, state distribution, and unique users from raw job items.
+func buildSummaryFromJobs(jobs []jobItem) string {
 	stateCounts := make(map[string]int)
 	users := make(map[string]struct{})
-	total := 0
+	total := len(jobs)
 
-	for _, it := range items {
-		ji, ok := it.(jobItem)
-		if !ok {
-			continue
-		}
-		total++
+	for _, ji := range jobs {
 		stateProp := ji.item.GetProperty("squeue.state").(*hpcmodel.StringProperty)
 		stateCounts[stateProp.Text]++
 		userProp := ji.item.GetProperty("squeue.user").(*hpcmodel.StringProperty)
@@ -172,46 +171,20 @@ func buildSummary(items []list.Item) string {
 	return infoStyle.Render(strings.Join(parts, "  "))
 }
 
-// listView renders the job list view including title, loading indicator, summary, list body, and footer hints.
+// buildSummary counts total jobs, state distribution, and unique users for the status bar.
+func buildSummary(items []list.Item) string {
+	var jobs []jobItem
+	for _, it := range items {
+		if ji, ok := it.(jobItem); ok {
+			jobs = append(jobs, ji)
+		}
+	}
+	return buildSummaryFromJobs(jobs)
+}
+
+// listView renders the job list view using the common list frame.
 func (m model) listView() tea.View {
-	var b strings.Builder
-
-	b.WriteString(titleStyle.Render(" Slurm Jobs "))
-	b.WriteString("\n")
-
-	// Show a friendly loading screen instead of the empty list's "No items".
-	if m.loading && len(m.list.Items()) == 0 {
-		b.WriteString("\n")
-		msg := loadingStyle.Render(" Fetching job data from Slurm... ")
-		pad := (m.width - lipgloss.Width(msg)) / 2
-		if pad < 0 {
-			pad = 0
-		}
-		b.WriteString(strings.Repeat(" ", pad))
-		b.WriteString(msg)
-		b.WriteString("\n")
-	} else {
-		if summary := buildSummary(m.list.Items()); summary != "" {
-			b.WriteString(summary)
-			b.WriteString("\n")
-		}
-		b.WriteString(m.list.View())
-		b.WriteString("\n")
-		if m.loading {
-			b.WriteString(loadingStyle.Render(" Loading jobs... "))
-			b.WriteString(" ")
-		}
-	}
-
-	if m.err != nil {
-		b.WriteString(errStyle.Render(fmt.Sprintf("Error: %v", m.err)))
-		b.WriteString(" ")
-	}
-
-	hint := "[r] refresh  [enter/→] detail  [pgup/pgdown] page  [q] quit"
-	if !m.lastUpdate.IsZero() {
-		hint += fmt.Sprintf("  |  updated: %s", m.lastUpdate.Format("15:04:05"))
-	}
-	b.WriteString(infoStyle.Render(hint))
-	return tea.NewView(b.String())
+	summary := buildSummary(m.list.Items())
+	hint := "[r] refresh  [t] tree  [enter/→] detail  [pgup/pgdown] page  [q] quit"
+	return m.renderJobList(m.list, " Slurm Jobs ", hint, summary)
 }

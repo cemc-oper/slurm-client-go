@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/list"
@@ -21,17 +22,23 @@ const (
 
 // model is the main Bubble Tea model holding all TUI state.
 type model struct {
-	state        viewState  // current view (list or detail)
-	list         list.Model // job list component
-	detailItem   *jobItem   // currently selected job for detail view
-	detailOffset int        // scroll offset in detail view
-	lastUpdate   time.Time  // last data refresh timestamp
-	err          error      // most recent fetch error
-	width        int        // terminal width
-	height       int        // terminal height
-	columns      []ColDef   // list column definitions
-	isDark       bool       // whether terminal has a dark background
-	loading      bool       // whether data is being fetched
+	state         viewState       // current view (list or detail)
+	list          list.Model      // flat job list component
+	treeList      list.Model      // tree view list component
+	detailItem    *jobItem        // currently selected job for detail view
+	detailOffset  int             // scroll offset in detail view
+	lastUpdate    time.Time       // last data refresh timestamp
+	err           error           // most recent fetch error
+	width         int             // terminal width
+	height        int             // terminal height
+	columns       []ColDef        // list column definitions
+	isDark        bool            // whether terminal has a dark background
+	loading       bool            // whether data is being fetched
+	displayMode   displayMode     // list or tree view
+	groupBy       []string        // grouping levels for tree view
+	treeCollapsed map[string]bool // group path key -> collapsed state (true = folded)
+	allItems      []jobItem       // cached raw items for mode switching
+	colWidths     []int           // cached column widths
 }
 
 var (
@@ -56,13 +63,44 @@ func initialModel() model {
 	l.SetShowHelp(false)
 	l.SetFilteringEnabled(false)
 
+	treeL := list.New([]list.Item{}, delegate, defaultWidth, listHeight)
+	treeL.SetShowTitle(false)
+	treeL.SetShowStatusBar(false)
+	treeL.SetShowHelp(false)
+	treeL.SetFilteringEnabled(false)
+
 	return model{
-		state:   listView,
-		list:    l,
-		columns: columns,
-		isDark:  isDark,
-		loading: true,
+		state:         listView,
+		list:          l,
+		treeList:      treeL,
+		columns:       columns,
+		isDark:        isDark,
+		loading:       true,
+		displayMode:   modeList,
+		groupBy:       []string{"squeue.user"},
+		treeCollapsed: make(map[string]bool),
 	}
+}
+
+// rebuildList reconstructs both the flat list and tree list with current data.
+func (m *model) rebuildList() {
+	var listItems []list.Item
+	for _, ji := range m.allItems {
+		listItems = append(listItems, ji)
+	}
+	m.list.SetItems(listItems)
+	m.list.SetDelegate(jobDelegate{columns: m.columns, colWidths: m.colWidths, isDark: m.isDark})
+
+	treeItems := buildTreeItems(m.allItems, m.groupBy, m.treeCollapsed)
+	var treeListItems []list.Item
+	for _, ti := range treeItems {
+		treeListItems = append(treeListItems, ti)
+	}
+	m.treeList.SetItems(treeListItems)
+	m.treeList.SetDelegate(treeDelegate{
+		jobDel: jobDelegate{columns: m.columns, colWidths: m.colWidths, isDark: m.isDark, indent: 0},
+		isDark: m.isDark,
+	})
 }
 
 // Init is called when the TUI starts; triggers the first data fetch.
@@ -70,6 +108,147 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		fetchJobsCmd(),
 	)
+}
+
+// handleListKey processes keyboard input in list view. Returns (cmd, true) if the key was handled.
+func (m *model) handleListKey(key string) (tea.Cmd, bool) {
+	switch key {
+	case "q", "ctrl+c":
+		return tea.Quit, true
+	case "r":
+		m.loading = true
+		return fetchJobsCmd(), true
+	case "t":
+		if m.displayMode == modeList {
+			m.displayMode = modeTree
+		} else {
+			m.displayMode = modeList
+		}
+		return nil, true
+	case "c":
+		currentIdx := 0
+		for i, preset := range groupByPresets {
+			if len(preset.levels) == len(m.groupBy) {
+				match := true
+				for j := range preset.levels {
+					if preset.levels[j] != m.groupBy[j] {
+						match = false
+						break
+					}
+				}
+				if match {
+					currentIdx = i
+					break
+				}
+			}
+		}
+		nextIdx := (currentIdx + 1) % len(groupByPresets)
+		m.groupBy = append([]string(nil), groupByPresets[nextIdx].levels...)
+		if m.displayMode == modeTree {
+			m.treeCollapsed = make(map[string]bool)
+		}
+		m.rebuildList()
+		return nil, true
+	case "a":
+		if m.displayMode == modeTree {
+			treeItems := buildTreeItems(m.allItems, m.groupBy, m.treeCollapsed)
+			groupPaths := make(map[string]struct{})
+			for _, ti := range treeItems {
+				if ti.itemType == treeItemGroup {
+					groupPaths[ti.pathKey] = struct{}{}
+				}
+			}
+			allCollapsed := true
+			for path := range groupPaths {
+				if !m.treeCollapsed[path] {
+					allCollapsed = false
+					break
+				}
+			}
+			if allCollapsed {
+				m.treeCollapsed = make(map[string]bool)
+			} else {
+				for path := range groupPaths {
+					m.treeCollapsed[path] = true
+				}
+			}
+			m.rebuildList()
+			return nil, true
+		}
+	case "enter", "right":
+		if m.displayMode == modeTree {
+			if ti, ok := m.treeList.SelectedItem().(treeItem); ok {
+				if ti.itemType == treeItemGroup {
+					if ti.isExpanded {
+						m.treeCollapsed[ti.pathKey] = true
+					} else {
+						delete(m.treeCollapsed, ti.pathKey)
+					}
+					m.rebuildList()
+					return nil, true
+				}
+				m.detailItem = &ti.job
+				m.state = detailView
+				m.detailOffset = 0
+				return nil, true
+			}
+		} else {
+			if i, ok := m.list.SelectedItem().(jobItem); ok {
+				m.detailItem = &i
+				m.state = detailView
+				m.detailOffset = 0
+				return nil, true
+			}
+		}
+	case "left":
+		if m.displayMode == modeTree {
+			if ti, ok := m.treeList.SelectedItem().(treeItem); ok {
+				if ti.itemType == treeItemGroup && ti.isExpanded {
+					m.treeCollapsed[ti.pathKey] = true
+					m.rebuildList()
+					return nil, true
+				}
+			}
+		}
+	}
+	return nil, false
+}
+
+// handleDetailKey processes keyboard input in detail view. Returns (cmd, true) if the key was handled.
+func (m *model) handleDetailKey(key string) (tea.Cmd, bool) {
+	switch key {
+	case "q", "esc", "left", "ctrl+c":
+		m.state = listView
+		m.detailItem = nil
+		m.detailOffset = 0
+		return nil, true
+	case "up":
+		if m.detailOffset > 0 {
+			m.detailOffset--
+		}
+		return nil, true
+	case "down":
+		m.detailOffset++
+		return nil, true
+	case "pgup":
+		pageSize := m.height - 4
+		if pageSize < 1 {
+			pageSize = 1
+		}
+		m.detailOffset -= pageSize
+		if m.detailOffset < 0 {
+			m.detailOffset = 0
+		}
+		return nil, true
+	case "pgdown":
+		pageSize := m.height - 4
+		if pageSize < 1 {
+			pageSize = 1
+		}
+		m.detailOffset += pageSize
+		return nil, true
+	}
+	return nil, false
 }
 
 // Update handles all input events and async messages to drive state transitions.
@@ -81,6 +260,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Reserve 4 lines for title, summary/status, footer hint, and spacing.
 		m.list.SetWidth(msg.Width)
 		m.list.SetHeight(msg.Height - 4)
+		m.treeList.SetWidth(msg.Width)
+		m.treeList.SetHeight(msg.Height - 4)
 		return m, nil
 
 	case jobsFetchedMsg:
@@ -90,74 +271,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.err = nil
 			m.lastUpdate = time.Now()
-			var listItems []list.Item
-			for _, ji := range msg.items {
-				listItems = append(listItems, ji)
-			}
-			m.list.SetItems(listItems)
-
-			hpcItems := make([]hpcmodel.Item, len(msg.items))
-			for i, ji := range msg.items {
+			m.allItems = msg.items
+			hpcItems := make([]hpcmodel.Item, len(m.allItems))
+			for i, ji := range m.allItems {
 				hpcItems[i] = ji.item
 			}
-			widths := computeColWidths(m.columns, hpcItems)
-			m.list.SetDelegate(jobDelegate{columns: m.columns, colWidths: widths, isDark: m.isDark})
+			m.colWidths = computeColWidths(m.columns, hpcItems)
+			m.rebuildList()
 		}
 		return m, nil
 
 	case tea.KeyMsg:
 		switch m.state {
 		case listView:
-			switch msg.String() {
-			case "q", "ctrl+c":
-				return m, tea.Quit
-			case "r":
-				m.loading = true
-				return m, fetchJobsCmd()
-			case "enter", "right":
-				if i, ok := m.list.SelectedItem().(jobItem); ok {
-					m.detailItem = &i
-					m.state = detailView
-					m.detailOffset = 0
-				}
-				return m, nil
-			case "pgup", "pgdown":
-				var cmd tea.Cmd
-				m.list, cmd = m.list.Update(msg)
+			if cmd, handled := m.handleListKey(msg.String()); handled {
 				return m, cmd
 			}
 		case detailView:
-			switch msg.String() {
-			case "q", "esc", "left", "ctrl+c":
-				m.state = listView
-				m.detailItem = nil
-				m.detailOffset = 0
-				return m, nil
-			case "up":
-				if m.detailOffset > 0 {
-					m.detailOffset--
-				}
-				return m, nil
-			case "down":
-				m.detailOffset++
-				return m, nil
-			case "pgup":
-				pageSize := m.height - 4
-				if pageSize < 1 {
-					pageSize = 1
-				}
-				m.detailOffset -= pageSize
-				if m.detailOffset < 0 {
-					m.detailOffset = 0
-				}
-				return m, nil
-			case "pgdown":
-				pageSize := m.height - 4
-				if pageSize < 1 {
-					pageSize = 1
-				}
-				m.detailOffset += pageSize
-				return m, nil
+			if cmd, handled := m.handleDetailKey(msg.String()); handled {
+				return m, cmd
 			}
 		}
 	case tea.MouseMsg:
@@ -180,7 +312,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
+	if m.displayMode == modeTree {
+		m.treeList, cmd = m.treeList.Update(msg)
+	} else {
+		m.list, cmd = m.list.Update(msg)
+	}
 	return m, cmd
 }
 
@@ -189,12 +325,52 @@ func (m model) View() tea.View {
 	var v tea.View
 	if m.state == detailView && m.detailItem != nil {
 		v = m.detailView()
+	} else if m.displayMode == modeTree {
+		v = m.treeListView()
 	} else {
 		v = m.listView()
 	}
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
 	return v
+}
+
+// renderJobList renders the common list frame for a given list component.
+func (m model) renderJobList(l list.Model, title, hint string, summary string) tea.View {
+	var b strings.Builder
+	b.WriteString(titleStyle.Render(title))
+	b.WriteString("\n")
+	if m.loading && len(l.Items()) == 0 {
+		b.WriteString("\n")
+		msg := loadingStyle.Render(" Fetching job data from Slurm... ")
+		pad := (m.width - lipgloss.Width(msg)) / 2
+		if pad < 0 {
+			pad = 0
+		}
+		b.WriteString(strings.Repeat(" ", pad))
+		b.WriteString(msg)
+		b.WriteString("\n")
+	} else {
+		if summary != "" {
+			b.WriteString(summary)
+			b.WriteString("\n")
+		}
+		b.WriteString(l.View())
+		b.WriteString("\n")
+		if m.loading {
+			b.WriteString(loadingStyle.Render(" Loading jobs... "))
+			b.WriteString(" ")
+		}
+	}
+	if m.err != nil {
+		b.WriteString(errStyle.Render(fmt.Sprintf("Error: %v", m.err)))
+		b.WriteString(" ")
+	}
+	if !m.lastUpdate.IsZero() {
+		hint += fmt.Sprintf("  |  updated: %s", m.lastUpdate.Format("15:04:05"))
+	}
+	b.WriteString(infoStyle.Render(hint))
+	return tea.NewView(b.String())
 }
 
 // TUICommand starts the Bubble Tea event loop and blocks until the user exits.
