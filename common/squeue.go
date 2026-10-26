@@ -215,6 +215,7 @@ func BuildSqueueCategoryList() slurm.QueryCategoryList {
 					ID:                      "squeue.priority",
 					DisplayName:             "Priority",
 					Label:                   "PRIORITY",
+					LabelOccurrence:         1,
 					PropertyClass:           "StringProperty",
 					PropertyCreateArguments: []string{},
 					RecordParserClass:       "TokenRecordParser",

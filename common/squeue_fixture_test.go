@@ -142,6 +142,44 @@ func TestGetSqueueQueryModelAnonymizedFixtures(t *testing.T) {
 	}
 }
 
+func TestGetSqueueQueryModelArrayJobs(t *testing.T) {
+	model, err := common.GetSqueueQueryModel(readSqueueFixture(t, "squeue_array_anonymized.txt"))
+	if err != nil {
+		t.Fatalf("GetSqueueQueryModel() error = %v", err)
+	}
+	if model == nil {
+		t.Fatal("GetSqueueQueryModel() returned a nil model")
+	}
+	if got, want := len(model.Items), 2; got != want {
+		t.Fatalf("len(Items) = %d, want %d", got, want)
+	}
+
+	tests := []struct {
+		row          int
+		wantJobID    string
+		wantState    string
+		wantPriority string
+	}{
+		{row: 0, wantJobID: "100123_2", wantState: "RUNNING", wantPriority: "0.9"},
+		{row: 1, wantJobID: "100123_3", wantState: "PENDING", wantPriority: "0.8"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.wantJobID, func(t *testing.T) {
+			item := model.Items[tt.row]
+			propertyTests := []struct{ id, want string }{
+				{id: "squeue.job_id", want: tt.wantJobID},
+				{id: "squeue.state", want: tt.wantState},
+				{id: "squeue.priority", want: tt.wantPriority},
+			}
+			for _, test := range propertyTests {
+				if got := requireStringProperty(t, item, test.id).Data; got != test.want {
+					t.Errorf("%s = %q, want %q", test.id, got, test.want)
+				}
+			}
+		})
+	}
+}
+
 func TestSqueueFixtureSpecialFields(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -175,7 +213,7 @@ func TestSqueueFixtureSpecialFields(t *testing.T) {
 }
 
 func TestSqueueFixtureColumnCounts(t *testing.T) {
-	for _, fixture := range []string{"squeue_sc1_anonymized.txt", "squeue_sc3_anonymized.txt"} {
+	for _, fixture := range []string{"squeue_sc1_anonymized.txt", "squeue_sc3_anonymized.txt", "squeue_array_anonymized.txt"} {
 		t.Run(fixture, func(t *testing.T) {
 			lines := readSqueueFixture(t, fixture)
 			wantColumns := strings.Count(lines[0], "|") + 1
@@ -192,7 +230,7 @@ func TestSqueueFixtureColumnCounts(t *testing.T) {
 }
 
 func TestGetSqueueQueryModelHeaderOnlyAndTrailingBlankLine(t *testing.T) {
-	for _, fixture := range []string{"squeue_sc1_anonymized.txt", "squeue_sc3_anonymized.txt"} {
+	for _, fixture := range []string{"squeue_sc1_anonymized.txt", "squeue_sc3_anonymized.txt", "squeue_array_anonymized.txt"} {
 		t.Run(fixture, func(t *testing.T) {
 			lines := readSqueueFixture(t, fixture)
 
