@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"charm.land/bubbles/v2/list"
@@ -160,11 +161,15 @@ func buildSummaryFromJobs(jobs []jobItem) string {
 			shown[s] = true
 		}
 	}
-	for s, c := range stateCounts {
-		if !shown[s] {
-			parts = append(parts, fmt.Sprintf("%s: %d", s, c))
-			shown[s] = true
+	unknownStates := make([]string, 0)
+	for state := range stateCounts {
+		if !shown[state] {
+			unknownStates = append(unknownStates, state)
 		}
+	}
+	sort.Strings(unknownStates)
+	for _, state := range unknownStates {
+		parts = append(parts, fmt.Sprintf("%s: %d", state, stateCounts[state]))
 	}
 
 	parts = append(parts, fmt.Sprintf("Users: %d", len(users)))

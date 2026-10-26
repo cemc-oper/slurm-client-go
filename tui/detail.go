@@ -7,6 +7,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/cemc-oper/hpc-model-go"
+	"github.com/charmbracelet/x/ansi"
 )
 
 // detailView renders detailed information for a single job, supporting keyboard and mouse scrolling.
@@ -116,11 +117,5 @@ func wrapText(text string, width int) string {
 	if width <= 0 {
 		return text
 	}
-	var lines []string
-	for len(text) > width {
-		lines = append(lines, text[:width])
-		text = text[width:]
-	}
-	lines = append(lines, text)
-	return strings.Join(lines, "\n")
+	return ansi.Hardwrap(text, width, true)
 }
