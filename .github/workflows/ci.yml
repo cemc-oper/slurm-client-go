@@ -2,15 +2,16 @@ name: CI
 
 on:
   push:
-    branches: ['**']
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  build-and-test:
+  test-independent:
     runs-on: ubuntu-latest
+    env:
+      GOWORK: off
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,13 +19,65 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: go.mod
 
-      - name: Drop local replace
-        run: go mod edit -dropreplace github.com/cemc-oper/hpc-model-go
+      - name: Check formatting
+        run: |
+          files="$(gofmt -l .)"
+          if [[ -n "$files" ]]; then
+            printf 'Unformatted Go files:\n%s\n' "$files"
+            exit 1
+          fi
 
-      - name: Build
-        run: make build
+      - name: Build with published dependencies
+        run: go build ./...
 
-      - name: Test
-        run: go test ./...
+      - name: Test with published dependencies
+        run: go test ./... -count=1
+
+      - name: Test with race detector
+        run: go test -race ./... -count=1
+
+      - name: Collect coverage
+        run: |
+          go test ./... -count=1 -covermode=atomic -coverprofile=coverage.out
+          go tool cover -func=coverage.out
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: slurm-client-go-coverage
+          path: coverage.out
+          if-no-files-found: error
+          retention-days: 14
+
+  test-local-workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout slurm-client-go
+        uses: actions/checkout@v4
+        with:
+          path: slurm-client-go
+
+      - name: Checkout hpc-model-go
+        uses: actions/checkout@v4
+        with:
+          repository: nwpc-oper/hpc-model-go
+          path: hpc-model-go
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: slurm-client-go/go.mod
+
+      - name: Create local Go workspace
+        run: go work init ./hpc-model-go ./slurm-client-go
+
+      - name: Test with local library
+        run: go -C slurm-client-go test ./... -count=1
+
+      - name: Test local workspace with race detector
+        run: go -C slurm-client-go test -race ./... -count=1
+
+      - name: Build with local library
+        run: go -C slurm-client-go build ./...
