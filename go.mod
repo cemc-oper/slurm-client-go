@@ -6,7 +6,7 @@ require (
 	charm.land/bubbles/v2 v2.1.0
 	charm.land/bubbletea/v2 v2.0.6
 	charm.land/lipgloss/v2 v2.0.3
-	github.com/cemc-oper/hpc-model-go v0.0.0-20260420055531-9622cf3f4276
+	github.com/cemc-oper/hpc-model-go v0.1.0
 	github.com/charmbracelet/x/ansi v0.11.7
 	github.com/spf13/cobra v1.10.2
 )
