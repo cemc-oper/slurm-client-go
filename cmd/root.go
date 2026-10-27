@@ -7,9 +7,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "slclient",
-	Short: "A CLI client for slurm",
-	Long:  `A command line tool for Slurm to query jobs.`,
+	Use:           "slclient",
+	Short:         "A CLI client for slurm",
+	Long:          `A command line tool for Slurm to query jobs.`,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

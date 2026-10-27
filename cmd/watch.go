@@ -2,21 +2,37 @@ package cmd
 
 import (
 	"fmt"
-	hpcmodel "github.com/cemc-oper/hpc-model-go"
-	"github.com/cemc-oper/slurm-client-go/common"
-	"github.com/spf13/cobra"
-	"log"
-	"strconv"
+	"io"
+	"os"
+	"sort"
 	"strings"
 	"time"
+
+	hpcmodel "github.com/cemc-oper/hpc-model-go"
+	"github.com/spf13/cobra"
 )
+
+type watchClock interface {
+	Now() time.Time
+	Sleep(duration time.Duration)
+}
+
+type realWatchClock struct{}
+
+func (realWatchClock) Now() time.Time {
+	return time.Now()
+}
+
+func (realWatchClock) Sleep(duration time.Duration) {
+	time.Sleep(duration)
+}
 
 var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "Watch jobs",
 	Long:  "Watch jobs until finished.",
-	Run: func(cmd *cobra.Command, args []string) {
-		WatchCommand(watchUsers, watchPartitions, watchJobs)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return watchCommand(cmd.OutOrStdout(), slurmCommandRunner{}, realWatchClock{}, watchUsers, watchPartitions, watchJobs)
 	},
 }
 
@@ -35,90 +51,42 @@ func init() {
 		&watchJobs, "job", "j", []string{}, "jobs")
 }
 
-func getRunningJobs(users []string, partitions []string, jobs []string) []hpcmodel.Item {
-	params := []string{"-o", "%all"}
-
-	filter := hpcmodel.Filter{}
-
-	if len(users) > 0 {
-		checker := hpcmodel.StringInValueChecker{
-			ExpectedValues: users,
-		}
-		condition := hpcmodel.StringPropertyFilterCondition{
-			ID:      "squeue.user",
-			Checker: &checker,
-		}
-		filter.Conditions = append(filter.Conditions, &condition)
-	}
-
-	if len(partitions) > 0 {
-		checker := hpcmodel.StringInValueChecker{
-			ExpectedValues: partitions,
-		}
-		condition := hpcmodel.StringPropertyFilterCondition{
-			ID:      "squeue.partition",
-			Checker: &checker,
-		}
-		filter.Conditions = append(filter.Conditions, &condition)
-	}
-
-	if len(jobs) > 0 {
-		checker := hpcmodel.StringInValueChecker{
-			ExpectedValues: jobs,
-		}
-		condition := hpcmodel.StringPropertyFilterCondition{
-			ID:      "squeue.job_id",
-			Checker: &checker,
-		}
-		filter.Conditions = append(filter.Conditions, &condition)
-	}
-
-	lines, err := common.GetSqueueCommandResult(params)
-	if err != nil {
-		log.Fatalf("get query result error: %v", err)
-	}
-
-	model, err := common.GetSqueueQueryModel(lines)
-	if err != nil {
-		log.Fatalf("model build failed: %v", err)
-	}
-
-	targetItems := filter.Filter(model.Items)
-	return targetItems
+func WatchCommand(users []string, partitions []string, jobs []string) error {
+	return watchCommand(os.Stdout, slurmCommandRunner{}, realWatchClock{}, users, partitions, jobs)
 }
 
-func getCurrentTime() string {
-	t := time.Now()
-	return t.Format("2006-01-02 15:04:05")
-}
-
-func WatchCommand(users []string, partitions []string, jobs []string) {
-	for true {
-		items := getRunningJobs(users, partitions, jobs)
-		jobLens := len(items)
-		if jobLens == 0 {
-			fmt.Printf("[%s]checking jobs...done\n", getCurrentTime())
-			break
+func watchCommand(output io.Writer, runner commandRunner, clock watchClock, users []string, partitions []string, jobs []string) error {
+	for {
+		items, err := fetchSqueueItems(runner, squeueQueryOptions{users: users, partitions: partitions, jobs: jobs})
+		if err != nil {
+			return err
+		}
+		currentTime := clock.Now().Format("2006-01-02 15:04:05")
+		if len(items) == 0 {
+			if _, err := fmt.Fprintf(output, "[%s]checking jobs...done\n", currentTime); err != nil {
+				return err
+			}
+			return nil
 		}
 
-		job_map := make(map[string]int)
+		stateCounts := make(map[string]int)
 		for _, item := range items {
 			state := item.GetProperty("squeue.state").(*hpcmodel.StringProperty).Text
-			val, ok := job_map[state]
-			if ok {
-				job_map[state] = val + 1
-			} else {
-				job_map[state] = 1
-			}
+			stateCounts[state]++
 		}
-		var tokens []string
-		for k, v := range job_map {
-			tokens = append(tokens, k+": "+strconv.Itoa(v))
+		states := make([]string, 0, len(stateCounts))
+		for state := range stateCounts {
+			states = append(states, state)
 		}
-		summary := strings.Join(tokens, ", ")
+		sort.Strings(states)
+		tokens := make([]string, 0, len(states))
+		for _, state := range states {
+			tokens = append(tokens, fmt.Sprintf("%s: %d", state, stateCounts[state]))
+		}
 
-		fmt.Printf("[%s]checking jobs...%s\n", getCurrentTime(), summary)
-		time.Sleep(time.Minute)
+		if _, err := fmt.Fprintf(output, "[%s]checking jobs...%s\n", currentTime, strings.Join(tokens, ", ")); err != nil {
+			return err
+		}
+		clock.Sleep(time.Minute)
 	}
-
 }
